@@ -1,0 +1,31 @@
+name: Lolipop Auto Deploy
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy-job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # 【診断ステップ】Secretがこのリポジトリに届いているかチェックします
+      - name: Diagnostic Check
+        run: |
+          echo "Checking Secrets Connectivity..."
+          if [ -n "${{ secrets.LOLIPOP_HOST }}" ]; then echo "HOST: FOUND"; else echo "HOST: MISSING"; fi
+          if [ -n "${{ secrets.LOLIPOP_USER }}" ]; then echo "USER: FOUND"; else echo "USER: MISSING"; fi
+          if [ -n "${{ secrets.LOLIPOP_PASSWORD }}" ]; then echo "PASS: FOUND"; else echo "PASS: MISSING"; fi
+
+      - name: SFTP Deploy
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.LOLIPOP_HOST }}
+          username: ${{ secrets.LOLIPOP_USER }}
+          password: ${{ secrets.LOLIPOP_PASSWORD }}
+          port: 2222
+          protocol: sftp
+          # フルパス + 公開フォルダ
+          server-dir: /home/users/0/sub.jp-houseinfo/web/houseinfo/lp/test-site/
