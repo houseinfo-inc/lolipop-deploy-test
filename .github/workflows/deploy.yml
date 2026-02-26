@@ -5,21 +5,23 @@ on:
     branches: [ main ]
 
 jobs:
-  deploy-job:
+  deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # SFTP（SSHパスワード）に特化した別のツールに切り替えます
-      - name: SFTP Deploy (Password)
-        uses: svenstaro/upload-sftp-action@v2
+      # 非常に安定している「wlixcc/SFTP-Deploy-Action」を使用します
+      - name: SFTP Deploy
+        uses: wlixcc/SFTP-Deploy-Action@v1.2.4
         with:
-          server: ${{ secrets.LOLIPOP_HOST }}
           username: ${{ secrets.LOLIPOP_USER }}
           password: ${{ secrets.LOLIPOP_PASSWORD }}
+          server: ${{ secrets.LOLIPOP_HOST }}
           port: 2222
-          # 転送したいファイル（全部）
-          file_source: './*'
-          # ★ここをロリポップのフルパスに書き換えてください
-          server_destination: /home/users/0/sub.jp-houseinfo/web/houseinfo/lp/test-site/
+          # 転送元のパス（リポジトリの全ファイル）
+          local_path: './'
+          # ★転送先のフルパス（最後に必ず / をつけてください）
+          remote_path: '/home/users/0/sub.jp-houseinfo/web/houseinfo/lp/test-site/'
+          # 同期時にサーバー側の古いファイルを消したくない場合は false
+          delete_remote_files: false
